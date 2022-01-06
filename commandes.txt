@@ -1,0 +1,30 @@
+1 - apt update
+2 -apt full-upgrade
+ 
+3 - apt install htop
+4 - apt install git
+ 
+ 
+5 - wget -O install.sh http://www.aapanel.com/script/install-ubuntu_6.0_en.sh && bash install.sh
+ 
+6 - Il faut ensuite installer mysql et Phpadmin dans la rubrique "App Store" du panel aaPanel.
+
+{
+Port à ouvrir dans l'onglet "Security" du panel aaPanel : 
+       - 30120 (Fivem)
+       - 40120 (TxAdmin)
+       - 39000:40000 (FTP)
+}
+ 
+
+
+7 - cd /www/wwwroot/
+
+8 - mkdir fivem
+9 - cd /www/wwwroot/fivem
+
+10 - wget https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/3922-d59ca5ee4232a9d636fd71e116f61960e974b29e/fx.tar.xz
+
+11 - tar xf fx.tar.xz
+12 -  git clone https://github.com/citizenfx/cfx-server-data.git /www/wwwroot/fivem/server-data
+13 - ./run.sh
