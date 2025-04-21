@@ -1,30 +1,90 @@
-1 - apt update
-2 -apt full-upgrade
- 
-3 - apt install htop
-4 - apt install git
- 
- 
-5 - wget -O install.sh http://www.aapanel.com/script/install-ubuntu_6.0_en.sh && bash install.sh
- 
-6 - Il faut ensuite installer mysql et Phpadmin dans la rubrique "App Store" du panel aaPanel.
+Prérequis
 
-{
-Port à ouvrir dans l'onglet "Security" du panel aaPanel : 
-       - 30120 (Fivem)
-       - 40120 (TxAdmin)
-       - 39000:40000 (FTP)
-}
- 
+Avant tout, assure-toi que ton système est à jour et que tu as les droits sudo.
 
+sudo apt update && sudo apt upgrade -y
 
-7 - cd /www/wwwroot/
+Installe les paquets nécessaires :
+sudo apt install git wget screen xz-utils curl -y
 
-8 - mkdir fivem
-9 - cd /www/wwwroot/fivem
+Installe MariaDB si tu comptes utiliser une base de données (utile avec ESX/QBCore) :
+sudo apt install mariadb-server -y
 
-10 - wget https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/3922-d59ca5ee4232a9d636fd71e116f61960e974b29e/fx.tar.xz
+Étape 1 – Créer un utilisateur (optionnel mais recommandé)
 
-11 - tar xf fx.tar.xz
-12 -  git clone https://github.com/citizenfx/cfx-server-data.git /www/wwwroot/fivem/server-data
-13 - ./run.sh
+Pour des raisons de sécurité, on crée un utilisateur dédié :
+
+sudo adduser fivem
+sudo usermod -aG sudo fivem
+su - fivem
+
+Étape 2 – Créer le dossier du serveur
+
+mkdir -p ~/fivem_server
+cd ~/fivem_server
+
+Étape 3 – Télécharger la dernière build de FiveM
+
+Va sur le lien suivant pour récupérer l’URL de la dernière version Linux : 👉 https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/
+
+Ensuite, fais :
+
+wget https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/<build_num>/fx.tar.xz
+tar xf fx.tar.xz
+rm fx.tar.xz
+(Remplace <build_num> par le dossier contenant la dernière version, exemple : 8493-f987e7e5d25567ae058ddc2cb727b248c073cbaa)
+
+Étape 4 – Ajouter start.sh (script de démarrage)
+
+Crée un fichier start.sh :
+
+nano ~/fivem_server/start.sh
+
+Ajoute ce contenu :
+#!/bin/bash
+cd "$(dirname "$0")"
+./run.sh +exec server.cfg
+Puis rends-le exécutable :
+
+chmod +x start.sh
+
+Étape 5 – Télécharger txAdmin
+
+Tu n'as rien à faire de plus, txAdmin est intégré par défaut depuis les dernières builds.
+
+Étape 6 – Créer un fichier server.cfg
+
+Tu peux créer un fichier de base comme ceci :
+
+nano ~/fivem_server/server.cfg
+Exemple de configuration basique :
+
+endpoint_add_tcp "0.0.0.0:30120"
+endpoint_add_udp "0.0.0.0:30120"
+
+sv_hostname "Mon Serveur FiveM"
+sv_maxclients 32
+sv_licenseKey "VOTRE_CLE_LICENCE"
+sv_licenseKeyToken ""
+
+enableTxAdmin true
+
+Étape 7 – Obtenir une clé de licence FiveM
+
+Va ici : https://keymaster.fivem.net/
+Connecte-toi avec ton compte Cfx.re
+Crée une clé correspondant à ton VPS
+Copie-la dans sv_licenseKey dans ton server.cfg
+
+Étape 8 – Lancer le serveur
+
+Depuis ton dossier fivem_server, lance :
+
+./start.sh
+Tu devrais voir txAdmin se lancer automatiquement. Il t'affichera une URL de configuration via le navigateur (avec token à usage unique).
+
+Accès txAdmin
+
+Ouvre ton navigateur et va sur l’adresse affichée dans la console, du style :
+http://<ip_vps>:40120/auth?token=XXXXX
+Configure le mot de passe, nom du serveur, et choisis une recette (template ESX/QBCore).
